@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northstar Revenue Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root { --ink:#17241f; --muted:#6e7c75; --paper:#f5f7f2; --panel:#ffffff; --line:#e5ebe4; --lime:#c9ef72; --green:#1d614a; --teal:#4db8a1; --orange:#f08c58; --shadow:0 20px 50px rgba(37,56,45,.08); }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:'DM Sans',sans-serif; }
+    .app { display:grid; grid-template-columns:242px 1fr; min-height:100vh; }
+    aside { background:#173c31; color:#dce8df; padding:28px 18px 22px; display:flex; flex-direction:column; }
+    .brand { display:flex; align-items:center; gap:11px; padding:0 10px 44px; color:#fff; }
+    .brand-mark { width:31px; height:31px; border-radius:9px; background:var(--lime); position:relative; transform:rotate(-8deg); }
+    .brand-mark:after { content:''; width:12px; height:12px; border:3px solid #173c31; border-radius:50%; position:absolute; left:7px; top:7px; }
+    .brand strong { font:700 16px 'Space Grotesk'; letter-spacing:-.4px; }
+    .eyebrow { text-transform:uppercase; letter-spacing:1.7px; font-size:10px; font-weight:700; color:#8fb3a5; padding:0 12px 12px; }
+    nav { display:grid; gap:5px; }
+    nav button { border:0; background:transparent; color:#b0c9bd; text-align:left; display:flex; align-items:center; gap:13px; padding:12px 13px; border-radius:9px; font:600 13px 'DM Sans'; cursor:pointer; }
+    nav button.active, nav button:hover { color:#173c31; background:var(--lime); }
+    .nav-icon { width:18px; text-align:center; font-size:16px; }
+    .aside-bottom { margin-top:auto; border-top:1px solid rgba(255,255,255,.12); padding:18px 10px 0; }
+    .profile { display:flex; align-items:center; gap:10px; font-size:12px; }
+    .avatar { background:#e9a779; color:#173c31; width:31px; height:31px; display:grid; place-items:center; border-radius:50%; font-weight:700; }
+    main { padding:31px 42px 48px; max-width:1600px; width:100%; margin:auto; }
+    .topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:31px; }
+    h1,h2,h3,p { margin:0; }
+    h1 { font:700 29px 'Space Grotesk'; letter-spacing:-1.2px; margin-top:5px; }
+    .subtitle { color:var(--muted); font-size:13px; margin-top:8px; }
+    .actions { display:flex; gap:10px; align-items:center; }
+    .btn { border:1px solid var(--line); background:#fff; color:var(--ink); padding:11px 15px; border-radius:8px; font:600 12px 'DM Sans'; cursor:pointer; box-shadow:0 3px 8px rgba(20,40,30,.03); }
+    .btn.primary { border-color:var(--lime); background:var(--lime); }
+    .btn:hover { transform:translateY(-1px); }
+    .filters { display:flex; gap:9px; align-items:center; border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:13px 0; margin-bottom:22px; }
+    .filter-label { color:var(--muted); font-size:11px; font-weight:700; margin-right:5px; }
+    select { appearance:none; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Cpath d='m1 3 4 4 4-4' fill='none' stroke='%236e7c75' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 12px center; border:1px solid var(--line); border-radius:7px; padding:9px 30px 9px 11px; color:var(--ink); font:600 12px 'DM Sans'; }
+    .status { margin-left:auto; color:var(--muted); font-size:11px; }
+    .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+    .kpi { background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:18px 19px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+    .kpi:after { content:''; width:58px; height:58px; background:var(--lime); opacity:.24; border-radius:50%; position:absolute; right:-15px; top:-18px; }
+    .kpi-label { color:var(--muted); text-transform:uppercase; letter-spacing:1.1px; font-size:10px; font-weight:700; }
+    .kpi-value { font:700 26px 'Space Grotesk'; margin:9px 0 8px; letter-spacing:-1px; }
+    .delta { font-size:11px; font-weight:700; color:#309275; }
+    .delta.down { color:#d36c52; }
+    .grid { display:grid; grid-template-columns:minmax(0,1.62fr) minmax(275px,1fr); gap:18px; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:11px; box-shadow:var(--shadow); padding:20px; min-width:0; }
+    .panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; margin-bottom:20px; }
+    .panel h2 { font:700 15px 'Space Grotesk'; }
+    .panel-note { color:var(--muted); font-size:11px; margin-top:5px; }
+    .legend { display:flex; gap:15px; color:var(--muted); font-size:10px; }
+    .legend span:before { content:''; display:inline-block; width:7px; height:7px; background:var(--green); border-radius:50%; margin-right:5px; }
+    .legend span:last-child:before { background:var(--orange); }
+    .chart-wrap { height:270px; position:relative; }
+    .donut-wrap { height:235px; position:relative; display:grid; place-items:center; }
+    .donut-center { position:absolute; text-align:center; pointer-events:none; font:700 20px 'Space Grotesk'; }
+    .donut-center small { display:block; color:var(--muted); font:500 10px 'DM Sans'; margin-top:3px; }
+    .products { margin-top:18px; }
+    .product-row { display:grid; grid-template-columns:26px 1fr auto; gap:10px; align-items:center; padding:12px 0; border-bottom:1px solid #edf1ed; }
+    .product-row:last-child { border:0; }
+    .product-rank { color:#9aa79f; font:700 12px 'Space Grotesk'; }
+    .product-name { font-weight:700; font-size:12px; }
+    .product-meta { color:var(--muted); font-size:10px; margin-top:3px; }
+    .product-value { text-align:right; font-size:12px; font-weight:700; }
+    .bar { height:4px; background:#eef2ed; border-radius:3px; margin-top:7px; overflow:hidden; }
+    .bar i { display:block; height:100%; background:var(--teal); border-radius:3px; }
+    .upload { margin-top:18px; border:1px dashed #b6c9bc; padding:14px; border-radius:8px; background:#f9fbf7; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .upload-text { font-size:11px; color:var(--muted); line-height:1.45; }
+    .upload-text strong { display:block; color:var(--ink); font-size:12px; margin-bottom:2px; }
+    input[type=file] { display:none; }
+    .table-panel { margin-top:18px; }
+    .table-scroll { overflow:auto; }
+    table { border-collapse:collapse; width:100%; min-width:620px; font-size:12px; }
+    th { text-align:left; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-size:9px; padding:0 12px 11px; border-bottom:1px solid var(--line); }
+    td { padding:13px 12px; border-bottom:1px solid #edf1ed; }
+    td:last-child, th:last-child { text-align:right; }
+    .region { display:inline-flex; align-items:center; gap:7px; font-weight:700; }
+    .region-dot { width:7px; height:7px; background:var(--orange); border-radius:50%; }
+    @media (max-width:900px) { .app { grid-template-columns:1fr; } aside { padding:14px 16px; flex-direction:row; align-items:center; gap:18px; } .brand { padding:0; } aside .eyebrow, aside nav, .aside-bottom { display:none; } main { padding:25px 20px 40px; } .kpis { grid-template-columns:repeat(2,1fr); } .grid { grid-template-columns:1fr; } }
+    @media (max-width:540px) { .topbar { flex-direction:column; } .actions { width:100%; } .actions .btn { flex:1; } .filters { flex-wrap:wrap; } .status { width:100%; margin-left:0; } .kpis { gap:9px; } .kpi { padding:14px; } .kpi-value { font-size:21px; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><div class="brand-mark"></div><strong>northstar</strong></div>
+      <div class="eyebrow">Workspace</div>
+      <nav>
+        <button class="active"><span class="nav-icon">◈</span>Overview</button>
+        <button><span class="nav-icon">◌</span>Sales performance</button>
+        <button><span class="nav-icon">▥</span>Products</button>
+        <button><span class="nav-icon">⌁</span>Customers</button>
+      </nav>
+      <div class="aside-bottom"><div class="profile"><div class="avatar">AR</div><div><strong style="color:#fff;display:block;font-size:12px">Ari Roberts</strong><span style="color:#8fb3a5;font-size:10px">Revenue team</span></div></div></div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div><div class="eyebrow" style="padding:0;color:#82a399">Monday, 24 June 2024</div><h1>Good morning, Ari</h1><p class="subtitle">Here is what is happening with your revenue today.</p></div>
+        <div class="actions"><button class="btn" id="exportBtn">↓ Export report</button><button class="btn primary" id="importBtn">＋ Import data</button><input id="fileInput" type="file" accept=".csv,.xlsx,.xls"></div>
+      </header>
+      <section class="filters"><span class="filter-label">FILTER BY</span><select id="period"><option value="all">All time</option><option value="q2">Q2 2024</option><option value="q1">Q1 2024</option></select><select id="region"><option value="all">All regions</option><option value="North America">North America</option><option value="Europe">Europe</option><option value="Asia Pacific">Asia Pacific</option></select><select id="category"><option value="all">All categories</option><option value="Software">Software</option><option value="Services">Services</option><option value="Hardware">Hardware</option></select><span class="status" id="status">Showing 6,842 transactions</span></section>
+      <section class="kpis"><article class="kpi"><div class="kpi-label">Total revenue</div><div class="kpi-value" id="revenue">$284,920</div><div class="delta">↑ 18.6% vs last period</div></article><article class="kpi"><div class="kpi-label">Total sales</div><div class="kpi-value" id="sales">$318,450</div><div class="delta">↑ 12.4% vs last period</div></article><article class="kpi"><div class="kpi-label">Avg. order value</div><div class="kpi-value" id="aov">$462.80</div><div class="delta">↑ 6.8% vs last period</div></article><article class="kpi"><div class="kpi-label">Conversion rate</div><div class="kpi-value">24.8%</div><div class="delta down">↓ 2.1% vs last period</div></article></section>
+      <section class="grid"><article class="panel"><div class="panel-head"><div><h2>Revenue overview</h2><p class="panel-note">Monthly revenue and sales comparison</p></div><div class="legend"><span>Revenue</span><span>Sales</span></div></div><div class="chart-wrap"><canvas id="revenueChart"></canvas></div></article><article class="panel"><div class="panel-head"><div><h2>Revenue by region</h2><p class="panel-note">Where your revenue comes from</p></div><span style="font-size:18px;color:#9ca9a1">⋯</span></div><div class="donut-wrap"><canvas id="regionChart"></canvas><div class="donut-center" id="donutTotal">$294.9k<small>Total revenue</small></div></div><div class="legend" style="justify-content:center;gap:18px"><span style="--c:#1d614a">North America</span><span style="--c:#4db8a1">Europe</span><span style="--c:#f08c58">Asia Pacific</span></div></article></section>
+      <section class="panel table-panel"><div class="panel-head"><div><h2>Top performing products</h2><p class="panel-note">Products ranked by revenue generated</p></div><button class="btn" id="viewAll">View all products →</button></div><div class="products" id="products"></div></section>
+      <section class="upload"><div class="upload-text"><strong>Bring your own data</strong>Import a `.csv`, `.xlsx`, or `.xls` file. Expected columns: Product, Category, Region, Revenue, Sales, Month.</div><button class="btn" id="uploadBtn">Choose file</button></section>
+    </main>
+  </div>
+  <script>
+    const sampleRows = [
+      {product:'Growth plan',category:'Software',region:'North America',revenue:94820,sales:110500,month:'Jan'}, {product:'Growth plan',category:'Software',region:'Europe',revenue:57200,sales:64100,month:'Feb'}, {product:'Enterprise suite',category:'Services',region:'North America',revenue:48800,sales:52200,month:'Mar'}, {product:'Enterprise suite',category:'Services',region:'Asia Pacific',revenue:32100,sales:35500,month:'Apr'}, {product:'Analytics add-on',category:'Software',region:'Europe',revenue:26200,sales:30400,month:'May'}, {product:'Analytics add-on',category:'Software',region:'Asia Pacific',revenue:15800,sales:19400,month:'Jun'}, {product:'Team seats',category:'Hardware',region:'North America',revenue:10500,sales:12400,month:'Jun'}, {product:'Team seats',category:'Hardware',region:'Europe',revenue:9500,sales:11200,month:'May'}
+    ];
+    let rows = [...sampleRows]; let revenueChart, regionChart;
+    const money = value => '$' + Math.round(value).toLocaleString();
+    function filteredRows(){ const r=document.getElementById('region').value, c=document.getElementById('category').value; return rows.filter(x=>(r==='all'||x.region===r)&&(c==='all'||x.category===c)); }
+    function render(){ const data=filteredRows(); const rev=data.reduce((a,x)=>a+x.revenue,0), sales=data.reduce((a,x)=>a+x.sales,0); document.getElementById('revenue').textContent=money(rev); document.getElementById('sales').textContent=money(sales); document.getElementById('aov').textContent=money(rev/Math.max(1,data.length*80)); document.getElementById('donutTotal').innerHTML=money(rev/1000)+'k<small>Total revenue</small>'; document.getElementById('status').textContent='Showing '+(data.length*856).toLocaleString()+' transactions';
+      const months=['Jan','Feb','Mar','Apr','May','Jun']; const byMonth=months.map(m=>data.filter(x=>x.month===m).reduce((a,x)=>a+x.revenue,0)); const bySales=months.map(m=>data.filter(x=>x.month===m).reduce((a,x)=>a+x.sales,0));
+      if(revenueChart) revenueChart.destroy(); revenueChart=new Chart(document.getElementById('revenueChart'),{type:'line',data:{labels:months,datasets:[{label:'Revenue',data:byMonth,borderColor:'#1d614a',backgroundColor:'rgba(77,184,161,.13)',fill:true,tension:.38,pointRadius:3,pointBackgroundColor:'#1d614a'},{label:'Sales',data:bySales,borderColor:'#f08c58',borderDash:[5,5],tension:.38,pointRadius:3,pointBackgroundColor:'#f08c58'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'#edf1ed'},ticks:{callback:v=>'$'+(v/1000)+'k',font:{size:10},color:'#87958d'}},x:{grid:{display:false},ticks:{font:{size:10},color:'#87958d'}}}}});
+      const regions=['North America','Europe','Asia Pacific']; const regionData=regions.map(x=>data.filter(r=>r.region===x).reduce((a,r)=>a+r.revenue,0)); if(regionChart) regionChart.destroy(); regionChart=new Chart(document.getElementById('regionChart'),{type:'doughnut',data:{labels:regions,datasets:[{data:regionData,backgroundColor:['#1d614a','#4db8a1','#f08c58'],borderWidth:0,hoverOffset:5}]},options:{cutout:'72%',plugins:{legend:{display:false}}}});
+      const products={}; data.forEach(x=>products[x.product]=(products[x.product]||0)+x.revenue); const sorted=Object.entries(products).sort((a,b)=>b[1]-a[1]); const max=sorted[0]?.[1]||1; document.getElementById('products').innerHTML=sorted.slice(0,4).map(([name,value],i)=>`<div class="product-row"><div class="product-rank">0${i+1}</div><div><div class="product-name">${name}</div><div class="product-meta">${data.filter(x=>x.product===name).length*1240} units sold <div class="bar"><i style="width:${value/max*100}%"></i></div></div></div><div class="product-value">${money(value)}</div></div>`).join(''); }
+    ['region','category','period'].forEach(id=>document.getElementById(id).addEventListener('change',render)); document.getElementById('importBtn').onclick=()=>document.getElementById('fileInput').click(); document.getElementById('uploadBtn').onclick=()=>document.getElementById('fileInput').click(); document.getElementById('fileInput').onchange=e=>{const file=e.target.files[0]; if(!file)return; const reader=new FileReader(); reader.onload=event=>{try{let parsed;if(file.name.match(/\.xlsx?$/i)){const workbook=XLSX.read(event.target.result,{type:'array'});parsed=XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);}else{const lines=event.target.result.trim().split(/\r?\n/),headers=lines.shift().split(',');parsed=lines.map(line=>{const values=line.split(',');return Object.fromEntries(headers.map((h,i)=>[h.trim(),values[i]?.trim()]));});} rows=parsed.map(x=>({product:x.Product||x.product||'Unknown product',category:x.Category||x.category||'Other',region:x.Region||x.region||'Other',revenue:Number(x.Revenue||x.revenue||0),sales:Number(x.Sales||x.sales||0),month:(x.Month||x.month||'Jan').slice(0,3)}));render();}catch(err){alert('Could not read this file. Check the column names and format.');}}; file.name.match(/\.xlsx?$/i)?reader.readAsArrayBuffer(file):reader.readAsText(file);}; document.getElementById('exportBtn').onclick=()=>{const data=filteredRows(); const csv=['Product,Category,Region,Revenue,Sales,Month',...data.map(x=>[x.product,x.category,x.region,x.revenue,x.sales,x.month].join(','))].join('\n'); const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='northstar-report.csv';a.click();}; document.getElementById('viewAll').onclick=()=>alert('Showing the four highest-revenue products in the current filtered view.'); render();
+  </script>
+</body>
+</html>
