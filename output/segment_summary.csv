@@ -1,0 +1,5 @@
+Cluster,Age,AnnualIncome,SpendingScore,MembershipTenure,PurchaseFrequency,CustomerCount,TopCategory,TopRegion
+0,27.0,46818.18,80.73,7.27,13.27,11,Electronics,North
+1,44.5,106250.0,37.5,26.5,8.5,4,HomeDecor,East
+2,33.5,71250.0,69.75,14.12,17.38,8,Apparel,West
+3,39.57,90285.71,50.14,21.71,10.43,7,Beauty,South
